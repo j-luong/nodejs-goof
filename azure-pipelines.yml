@@ -20,14 +20,14 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
-- task: SnykSecurityCodeScan@0
+- task: SnykSecurityScan@0
   inputs:
     serviceConnectionEndpoint: 'Snyk'
     testType: 'code'
     failOnIssues: false
     debug: true
 
-- task: SnykSecurityAppScan@1
+- task: SnykSecurityScan@1
   inputs:
     serviceConnectionEndpoint: 'Snyk'
     testType: 'app'
