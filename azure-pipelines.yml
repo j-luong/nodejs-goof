@@ -24,3 +24,4 @@ steps:
     serviceConnectionEndpoint: 'Snyk'
     testType: 'code'
     failOnIssues: false
+    debug: true
