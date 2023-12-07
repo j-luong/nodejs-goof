@@ -27,4 +27,4 @@ steps:
     monitorWhen: 'never'
     failOnIssues: false
     additionalArguments: '--all-projects'
-    debug: true
+    debug: false
