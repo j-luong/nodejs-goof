@@ -26,5 +26,5 @@ steps:
     testType: 'app'
     monitorWhen: 'never'
     failOnIssues: false
-    additionalArguments: '--all-projects'
+    additionalArguments: '--all-projects, -d'
     debug: false
