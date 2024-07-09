@@ -1,0 +1,24 @@
+name: "custom snyk action test"
+on: 
+  workflow_dispatch
+jobs:
+  security:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@master
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: -d --all-projects --severity-threshold=high --fail-on=upgradable  
+  container-test-job-working:
+    runs-on: ubuntu-latest
+    container: snyk/snyk:node
+    steps:
+      - uses: actions/checkout@master
+  container-test-job-no-image:
+    runs-on: ubuntu-latest
+    container: snyk/snyk:node-1234
+    steps:
+      - uses: actions/checkout@master
