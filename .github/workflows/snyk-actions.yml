@@ -1,24 +1,36 @@
 name: "validating available snyk actions"
-on: 
-  workflow_dispatch
+on: [push, pull_request, workflow_dispatch]
 jobs:
-  security:
-    runs-on: docker
+  nodeAction:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Run Snyk to check for vulnerabilities
+      - name: Validate actions/node
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: -d --all-projects --severity-threshold=high --fail-on=upgradable  
-  sbtScalaAction:
-    runs-on: docker
+          args: -d
+          command: help
+  scalaAction:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Run Snyk to check for vulnerabilities
+      - name: Validate actions/scala
+        uses: snyk/actions/scala@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: -d
+          command: help
+  sbtScalaAction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Validate actions/sbt1.10.0-scala3.4.2 
         uses: snyk/actions/sbt1.10.0-scala3.4.2@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: -vd
+          args: -d
+          command: help
