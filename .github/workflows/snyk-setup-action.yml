@@ -1,0 +1,49 @@
+name: "validating snyk setup action arch support"
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - uses: snyk/actions/setup@fix/CLI-279_add_alpine
+      - name: Validate actions/setup (windows)
+        run: snyk test -d
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - uses: snyk/actions/setup@fix/CLI-279_add_alpine
+      - name: Validate actions/setup (mac)
+        run: snyk test -d
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - uses: snyk/actions/setup@fix/CLI-279_add_alpine
+      - name: Validate actions/setup (linux)
+        run: snyk test -d
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  alpine:
+    runs-on: ubuntu-latest
+    container: node:18-alpine
+    steps:
+      - uses: actions/checkout@master
+      - uses: snyk/actions/setup@fix/CLI-279_add_alpine
+      - name: Validate actions/setup (alpine)
+        run: snyk test -d
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
