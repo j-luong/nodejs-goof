@@ -1,0 +1,25 @@
+name: "snyk go action"
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: snyk/actions/setup@master
+
+      - name: Snyk Test
+        uses: snyk/actions/golang@master
+        continue-on-error: true
+        env:
+            SNYK_TOKEN: ${{secrets.SNYK_TOKEN}}
+        with:
+          command: test
+          args: "-d --prune-repeated-subdependencies --org=platform_hammerhead_testing"
+
+      - name: Snyk Monitor
+        uses: snyk/actions/golang@master
+        env:
+            SNYK_TOKEN: ${{secrets.SNYK_TOKEN}}
+        with:
+          command: monitor
+          args: "-d --prune-repeated-subdependencies --org=platform_hammerhead_testing"

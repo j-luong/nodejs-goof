@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - uses: snyk/actions/setup@master
+      - uses: snyk/actions/setup@chore/addVerboseOutputToSetupAction
       - name: Validate actions/setup (linux)
         run: snyk test -d
         env:
