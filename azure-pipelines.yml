@@ -19,8 +19,18 @@ steps:
     npm ci
     npm run build
   displayName: 'npm install and build'
+
 - task: SnykSecurityScan@1
   displayName: 'Snyk: Scan Projects'
+  inputs:
+    serviceConnectionEndpoint: 'Snyk'
+    testType: 'app'
+    monitorWhen: 'never'
+    failOnIssues: false
+    additionalArguments: '--all-projects, --dev, -d'
+    debug: true
+
+- task: DevSnykSecurityScan@0
   inputs:
     serviceConnectionEndpoint: 'Snyk'
     testType: 'app'
