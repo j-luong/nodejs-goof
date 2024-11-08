@@ -30,11 +30,11 @@ steps:
     additionalArguments: '--all-projects, --dev, -d'
     debug: true
 
-- task: DevSnykSecurityScan@0
-  inputs:
-    serviceConnectionEndpoint: 'Snyk'
-    testType: 'app'
-    monitorWhen: 'never'
-    failOnIssues: false
-    additionalArguments: '--all-projects, --dev, -d'
-    debug: true
+# - task: DevSnykSecurityScan@0
+#   inputs:
+#     serviceConnectionEndpoint: 'Snyk'
+#     testType: 'app'
+#     monitorWhen: 'never'
+#     failOnIssues: false
+#     additionalArguments: '--all-projects, --dev, -d'
+#     debug: true
