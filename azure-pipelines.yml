@@ -1,4 +1,5 @@
 # Node.js
+
 # Build a general Node.js project with npm.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
@@ -21,16 +22,16 @@ steps:
 
 # Docker v2
 # Build or push Docker images, login or logout, start or stop containers, or run a Docker command.
-- task: Docker@2
-  inputs:
-  # Container Repository
-    #containerRegistry: # string. Container registry. 
-    #repository: # string. Optional. Use when command != login && command != logout && command != start && command != stop. Container repository. 
-  # Commands
-    command: 'build'
-    Dockerfile: 'Dockerfile'
-    buildContext: '**'
-    tags: 'goof'
+# - task: Docker@2
+#   inputs:
+#   # Container Repository
+#     #containerRegistry: # string. Container registry. 
+#     #repository: # string. Optional. Use when command != login && command != logout && command != start && command != stop. Container repository. 
+#   # Commands
+#     command: 'build'
+#     Dockerfile: 'Dockerfile'
+#     buildContext: '**'
+#     tags: 'goof'
     #arguments: # string. Optional. Use when command != login && command != logout && command != buildAndPush. Arguments. 
     #addPipelineData: true # boolean. Add Pipeline metadata to image(s). Default: true.
     #addBaseImageData: true # boolean. Add base image metadata to image(s). Default: true.
@@ -55,13 +56,24 @@ steps:
 #     additionalArguments: '--all-projects, --dev, -d'
 #     debug: true
 
+# - task: SnykSecurityScan@1
+#   displayName: 'Snyk: Scan Container Image'
+#   inputs:
+#     serviceConnectionEndpoint: 'Snyk'
+#     testType: 'container'
+#     dockerImageName: 'goof'
+#     dockerfilePath: 'Dockerfile'
+#     monitorWhen: 'never'
+#     failOnIssues: true
+#     additionalArguments: '-d'
+#     debug: true
+
 - task: SnykSecurityScan@1
-  displayName: 'Snyk: Scan Container Image'
   inputs:
     serviceConnectionEndpoint: 'Snyk'
     testType: 'container'
-    dockerImageName: 'goof'
-    dockerfilePath: 'Dockerfile'
+    dockerImageName: 'snyk/snyk-cli:maven-3.6.3'
+    severityThreshold: 'critical'
     monitorWhen: 'never'
     failOnIssues: true
     additionalArguments: '-d'
