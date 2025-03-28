@@ -10,21 +10,31 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: NodeTool@0
-  displayName: 'Install Node.js'
-  inputs:
-    versionSpec: '18.18.x'
-- script: |
-    npm ci
-    npm run build
-  displayName: 'npm install and build'
-- task: Docker@2
-  displayName: Build Docker image
-  inputs:
-    repository: goof
-    command: build
-    Dockerfile: Dockerfile
+# - task: NodeTool@0
+#   displayName: 'Install Node.js'
+#   inputs:
+#     versionSpec: '18.18.x'
+# - script: |
+#     npm ci
+#     npm run build
+#   displayName: 'npm install and build'
 
+# Docker v2
+# Build or push Docker images, login or logout, start or stop containers, or run a Docker command.
+- task: Docker@2
+  inputs:
+  # Container Repository
+    #containerRegistry: # string. Container registry. 
+    #repository: # string. Optional. Use when command != login && command != logout && command != start && command != stop. Container repository. 
+  # Commands
+    command: 'build'
+    Dockerfile: 'Dockerfile'
+    buildContext: '**'
+    tags: 'goof'
+    #arguments: # string. Optional. Use when command != login && command != logout && command != buildAndPush. Arguments. 
+    #addPipelineData: true # boolean. Add Pipeline metadata to image(s). Default: true.
+    #addBaseImageData: true # boolean. Add base image metadata to image(s). Default: true.
+    #container: # string. Optional. Use when command = start || command = stop. Container.
 
 # - task: SnykSecurityScan@1
 #   displayName: 'Snyk: Scan Projects'
@@ -46,7 +56,7 @@ steps:
 #     debug: true
 
 - task: SnykSecurityScan@1
-  displayName: 'Snyk: Scan Projects'
+  displayName: 'Snyk: Scan Container Image'
   inputs:
     serviceConnectionEndpoint: 'Snyk'
     testType: 'container'
