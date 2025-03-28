@@ -10,20 +10,20 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+- task: NodeTool@0
+  displayName: 'Install Node.js'
+  inputs:
+    versionSpec: '18.18.x'
+- script: |
+    npm ci
+    npm run build
+  displayName: 'npm install and build'
 - task: Docker@2
   displayName: Build Docker image
   inputs:
     repository: goof
     command: build
     Dockerfile: Dockerfile
-- task: NodeTool@0
-  inputs:
-    versionSpec: '18.18.x'
-  displayName: 'Install Node.js'
-- script: |
-    npm ci
-    npm run build
-  displayName: 'npm install and build'
 
 
 # - task: SnykSecurityScan@1
