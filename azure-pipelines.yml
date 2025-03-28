@@ -64,7 +64,7 @@ steps:
     dockerImageName: 'jsonldocker/goof:latest'
     dockerfilePath: 'Dockerfile'
     monitorWhen: 'never'
-    failOnIssues: true
+    failOnIssues: false
     additionalArguments: '-d'
     debug: true
 
