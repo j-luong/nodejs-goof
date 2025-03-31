@@ -63,8 +63,10 @@ steps:
     testType: 'container'
     dockerImageName: 'jsonldocker/goof:latest'
     dockerfilePath: 'Dockerfile'
-    monitorWhen: 'never'
-    failOnIssues: false
+    severityThreshold: 'critical'
+    monitorWhen: 'always'
+    failOnIssues: true
+    organization: 'platform_hammerhead_testing'
     additionalArguments: '-d'
     debug: true
 
