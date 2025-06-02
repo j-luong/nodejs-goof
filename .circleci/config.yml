@@ -1,0 +1,16 @@
+version: 2.1
+
+orbs:
+  snyk: snyk/snyk@2.3.0
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:24.1.0
+    steps:
+      - checkout
+      - run:
+          command: npm install -q
+      - snyk/scan:
+          cli-version: 1.1298.0-dev.1c91b30d58b4c3418c5fe053cfbd3a25427460cc
+          additional-arguments: -d
