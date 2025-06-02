@@ -1,0 +1,18 @@
+version: 2.1
+
+orbs:
+  snyk: snyk/snyk@2.3.0
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:7.1.0
+    steps:
+      - checkout
+      - run:
+          command: npm install -q
+      - snyk/scan:
+          token-variable: CICD_SNYK_TOKEN                           # use is api token stored in an env variable named other than SNYK_TOKEN
+          fail-on-issues: true                                      # don't fail even if issues detected (not recommended!)
+          no-output-timeout: 20m                                    # set timeout without output to 20 mins
+          cli-version: v1.1298.0-dev.1c91b30d58b4c3418c5fe053cfbd3a25427460cc
