@@ -10,8 +10,8 @@ jobs:
       with:
         snyk-version: v1.391.0
     - uses: actions/setup-node@v4
-        with:
-          node-version: 18
+      with:
+        node-version: 18
     - name: Snyk version
       run: echo "${{ steps.snyk.outputs.version }}"
     - name: Snyk test 
