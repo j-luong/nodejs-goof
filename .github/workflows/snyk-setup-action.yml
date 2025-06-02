@@ -1,60 +1,77 @@
 name: "validating snyk setup action arch support"
 on: [push, pull_request, workflow_dispatch]
 jobs:
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - uses: snyk/actions/setup@master
-      - name: Validate actions/setup (windows)
-        run: snyk test -d
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - uses: snyk/actions/setup@master
-      - name: Validate actions/setup (mac)
-        run: snyk test -d
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  linux:
+  snyk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v4
+    - uses: actions/checkout@master
+    - uses: snyk/actions/setup@master
+      id: snyk
+      with:
+        snyk-version: v1.391.0
+    - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - name: Validate actions/setup (linux)
-        run: snyk test -d
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  linux-pat:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@v4
-        with:
-          snyk-version: v1.1298.0-dev.1c91b30d58b4c3418c5fe053cfbd3a25427460cc
-          node-version: 18
-      - name: Validate actions/setup (linux)
-        run: snyk test -d
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  alpine:
-    runs-on: ubuntu-latest
-    container: node:18-alpine
-    steps:
-      - uses: actions/checkout@master
-      - uses: snyk/actions/setup@master
-      - name: Validate actions/setup (alpine)
-        run: snyk test -d
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    - name: Snyk version
+      run: echo "${{ steps.snyk.outputs.version }}"
+    - name: Snyk test 
+      run: snyk test -d
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  # windows:
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 18
+  #     - uses: snyk/actions/setup@master
+  #     - name: Validate actions/setup (windows)
+  #       run: snyk test -d
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  # macos:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 18
+  #     - uses: snyk/actions/setup@master
+  #     - name: Validate actions/setup (mac)
+  #       run: snyk test -d
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  # linux:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 18
+  #     - name: Validate actions/setup (linux)
+  #       run: snyk test -d
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  # linux-pat:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         snyk-version: v1.1298.0-dev.1c91b30d58b4c3418c5fe053cfbd3a25427460cc
+  #         node-version: 18
+  #     - name: Validate actions/setup (linux)
+  #       run: snyk test -d
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  # alpine:
+  #   runs-on: ubuntu-latest
+  #   container: node:18-alpine
+  #   steps:
+  #     - uses: actions/checkout@master
+  #     - uses: snyk/actions/setup@master
+  #     - name: Validate actions/setup (alpine)
+  #       run: snyk test -d
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
