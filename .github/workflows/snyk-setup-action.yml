@@ -8,7 +8,7 @@ jobs:
     - uses: snyk/actions/setup@master
       id: snyk
       with:
-        snyk-version: v1.391.0
+        snyk-version: v1.1298.0-dev.1c91b30d58b4c3418c5fe053cfbd3a25427460cc
     - uses: actions/setup-node@v4
       with:
         node-version: 18
