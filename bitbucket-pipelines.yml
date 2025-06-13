@@ -1,0 +1,49 @@
+#  Template NodeJS build
+
+#  This template allows you to validate your NodeJS code.
+#  The workflow allows running tests and code linting on the default branch.
+
+image: node:18
+
+pipelines:
+  default:
+    - step:
+        name: Build
+        caches:
+          - node
+        script:
+          - npm install
+    - step:
+        name: Snyk scan (CLI)
+        script:
+          # Download Snyk Linux CLI
+          - curl https://downloads.snyk.io/cli/preview/snyk-linux -o snyk-linux
+          # Download Snyk Linux CLI SHASUM
+          - curl https://downloads.snyk.io/cli/preview/snyk-linux.sha256 -o snyk.sha256
+          # Validate binary using SHASUM
+          - sha256sum -c snyk.sha256
+          # Configure CLI for executtion
+          - chmod +x snyk-linux
+          - mv snyk-linux /usr/local/bin/snyk
+          - snyk test --all-projects -d
+    - step:
+        name: Snyk scan (integration)
+        script:
+          - pipe: snyk/snyk-scan:1.0.2
+            variables:
+              SNYK_TOKEN: $SNYK_EU_PAT
+              LANGUAGE: "node-22-preview"
+              # IMAGE_NAME: <string> # Only required if LANGUAGE set to "docker"
+              SNYK_BASE_IMAGE: "snyk/snyk" # Custom base image
+              CODE_INSIGHTS_RESULTS: "false" # Optional.
+              # SNYK_TEST_JSON_INPUT: "snyk-test-output.json" # Optional. The filename or path of a JSON file containg the output from running a test with the Snyk CLI (with json output option).
+              # PROTECT: "<boolean>" # Optional.
+              # DONT_BREAK_BUILD: "true" # Optional.
+              # MONITOR: "<boolean>" # Optional.
+              # SEVERITY_THRESHOLD: "<low|medium|high|critical>" # Optional.
+              ORGANIZATION: $SNYK_ORG # Optional.
+              # PROJECT_FOLDER: "<string>" # Optional.
+              # TARGET_FILE: "<string>" # Optional.
+              EXTRA_ARGS: "--all-projects" # Optional.
+              DEBUG: "true" # Optional.
+              # SNYK_API: "<string"> # Optional.

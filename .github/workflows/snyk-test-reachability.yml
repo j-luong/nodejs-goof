@@ -1,0 +1,32 @@
+name: "snyk test reachability"
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: snyk/actions/setup@master
+        id: snyk
+        with:
+          snyk-version: preview
+      - name: Snyk version
+        run: echo "${{ steps.snyk.outputs.version }}"
+      - name: Snyk Test
+        run: snyk test --reachability --sarif-file-output=snyk-sarif.json
+        continue-on-error: true
+        env:
+           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+           SNYK_CFG_ORG: "platform_hammerhead_testing"
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sarif-files
+          path: "*-sarif.json"
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk-sarif.json

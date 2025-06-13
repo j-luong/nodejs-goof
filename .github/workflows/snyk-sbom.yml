@@ -1,0 +1,33 @@
+name: "snyk sbom"
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4           
+      - uses: snyk/actions/setup@master
+      - name: Snyk SBOM
+        run: snyk sbom -d --format=cyclonedx1.6+json --json-file-output=snyk.sbom.json
+        continue-on-error: true
+        env:
+           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+           SNYK_ORG: ${{ secrets.SNYK_ORG }}
+           SNYK_API: ${{ secrets.SNYK_API }}
+           
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sbom-files
+          path: "*.sbom.json"
+          
+      - name: Snyk SBOM Test
+        run: snyk sbom test -d --file=snyk.sbom.json --experimental
+        continue-on-error: true
+        env:
+           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+           SNYK_ORG: ${{ secrets.SNYK_ORG }}
+           SNYK_API: ${{ secrets.SNYK_API }}
