@@ -29,7 +29,7 @@ jobs:
             - v1-dependencies-{{ checksum "package-lock.json" }}
             - v1-dependencies-
       - snyk/scan:
-          cli-version: preview
+          cli-version: 1.1301.0-preview.333c5a29ba4bdbc1e649036827bd784df8a31dd2
           command: test
           monitor-on-build: false
           additional-arguments: -d --reachability --org=platform_hammerhead_testing --sarif-file-output=ignoreme.sarif.json
