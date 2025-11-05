@@ -79,6 +79,9 @@ workflows:
   build_and_scan:
     jobs:
       - build
+      - snyk_oss_reachability:
+          requires:
+            - build
       - snyk_sbom:
           requires:
             - build
