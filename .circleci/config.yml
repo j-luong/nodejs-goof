@@ -33,6 +33,9 @@ jobs:
           command: test
           monitor-on-build: false
           additional-arguments: -d --reachability --org=platform_hammerhead_testing --sarif-file-output=ignoreme.sarif.json
+      - store_artifacts:
+          path: ignoreme.sarif.json
+          destination: sarif-output
       - save_cache:
           key: v1-sarif-{{ checksum "package-lock.json" }}
           paths:
@@ -51,6 +54,9 @@ jobs:
           command: sbom
           monitor-on-build: false
           additional-arguments: -d --org=platform_hammerhead_testing --format=cyclonedx1.6+json --json-file-output=ignoreme.sbom.json
+      - store_artifacts:
+          path: ignoreme.sbom.json
+          destination: sbom-output
       - save_cache:
           key: v1-sbom-{{ checksum "package-lock.json" }}
           paths:
