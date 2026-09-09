@@ -42,7 +42,7 @@ app.use(methodOverride());
 app.use(session({
   secret: process.env.SESSION_SECRET,
   name: 'connect.sid',
-  cookie: { path: '/' }
+  cookie: { path: '/', secure: true, httpOnly: true }
 }))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
