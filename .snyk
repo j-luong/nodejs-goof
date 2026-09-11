@@ -1,0 +1,14 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.0
+ignore:
+  SNYK-JS-ADMZIP-19276676:
+    - '*':
+        reason: >-
+          No adm-zip release fixes this Symlink Attack (CVE-2026-76845).
+          adm-zip 0.5.18 is required to clear the other high-severity adm-zip
+          advisories (SNYK-JS-ADMZIP-1065796, SNYK-JS-ADMZIP-17954277) and the
+          Zip Slip critical (npm:adm-zip:20180415); every version below 0.5.18
+          reintroduces one of those. Risk formally accepted. Revisit if a fixed
+          release ships or adm-zip is replaced with a maintained library.
+        expires: 2026-12-10T00:00:00.000Z
+patch: {}
