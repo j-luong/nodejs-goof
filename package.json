@@ -55,6 +55,9 @@
   },
   "license": "Apache-2.0",
   "overrides": {
-    "handlebars": "^4.5.3"
+    "handlebars": "^4.5.3",
+    "tap": {
+      "nyc": "^14.1.1"
+    }
   }
 }
