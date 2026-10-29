@@ -10,6 +10,16 @@ var readline = require('readline');
 var moment = require('moment');
 var exec = require('child_process').exec;
 var validator = require('validator');
+var rateLimit = require('express-rate-limit');
+
+// Throttle requests per client IP (several routes do file system or command work)
+var limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+exports.limiter = limiter;
 
 // zip-slip
 var fileType = require('file-type');
@@ -18,6 +28,14 @@ var fs = require('fs');
 
 // prototype-pollution
 var _ = require('lodash');
+
+// Only allow same-site relative paths ("/foo"), never "//host", "/\host" or absolute URLs
+function safeRedirectPath(page) {
+  if (typeof page === 'string' && /^\/(?![\/\\])[^\r\n]*$/.test(page)) {
+    return page
+  }
+  return undefined
+}
 
 function onLoginSuccessHook(redirectPage, session, username, res) {
   session.loggedIn = 1
@@ -48,10 +66,12 @@ exports.index = function (req, res, next) {
 };
 
 exports.loginHandler = function (req, res, next) {
-  if (validator.isEmail(req.body.username)) {
-    User.find({ username: req.body.username, password: req.body.password }, function (err, users) {
+  // reject non-string values so query operators (e.g. {"$ne": ""}) can't be injected
+  if (typeof req.body.username === 'string' && typeof req.body.password === 'string'
+    && validator.isEmail(req.body.username)) {
+    User.find({ username: String(req.body.username), password: String(req.body.password) }, function (err, users) {
       if (users.length > 0) {
-        const redirectPage = req.body.redirectPage
+        const redirectPage = safeRedirectPath(req.body.redirectPage)
         const session = req.session
         const username = req.body.username
         return adminLoginSuccess(redirectPage, session, username, res)
