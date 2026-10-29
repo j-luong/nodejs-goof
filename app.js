@@ -10,6 +10,8 @@ var st = require('st');
 var crypto = require('crypto');
 var express = require('express');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 var path = require('path');
 var ejsEngine = require('ejs-locals');
 var bodyParser = require('body-parser');
@@ -28,6 +30,15 @@ const hbs = require('hbs')
 
 var app = express();
 app.disable('x-powered-by');
+
+// Behind a TLS-terminating proxy: send any plain-HTTP request to HTTPS
+if (process.env.FORCE_HTTPS === '1') {
+  app.set('trust proxy', 1);
+  app.use(function (req, res, next) {
+    if (req.secure) return next();
+    return res.redirect(308, 'https://' + req.headers.host + req.originalUrl);
+  });
+}
 var routes = require('./routes');
 var routesUsers = require('./routes/users.js')
 
@@ -94,6 +105,18 @@ if (app.get('env') == 'development') {
 
 var token = process.env.APP_TOKEN;
 
-http.createServer(app).listen(app.get('port'), function () {
+// Serve HTTPS directly when a key/certificate pair is configured. Otherwise listen on
+// plain HTTP and rely on a TLS-terminating proxy in front of the app (see FORCE_HTTPS).
+var server;
+if (process.env.TLS_KEY_PATH && process.env.TLS_CERT_PATH) {
+  server = https.createServer({
+    key: fs.readFileSync(process.env.TLS_KEY_PATH),
+    cert: fs.readFileSync(process.env.TLS_CERT_PATH),
+  }, app);
+} else {
+  server = http.createServer(app);
+}
+
+server.listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));
 });

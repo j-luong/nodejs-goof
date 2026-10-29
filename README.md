@@ -86,6 +86,8 @@ You'd think that what's the worst that can happen because we use a validation to
 
 > The `admin@snyk.io` account is seeded with the password from the `ADMIN_PASSWORD` environment variable (e.g. `ADMIN_PASSWORD=SuperSecretPassword npm start`). Without it, the account gets a random password and you can't log in.
 
+> To serve HTTPS directly, set `TLS_KEY_PATH` and `TLS_CERT_PATH` to a PEM key and certificate. Behind a TLS-terminating proxy, set `FORCE_HTTPS=1` to redirect plain-HTTP requests to HTTPS. With neither, the app listens on plain HTTP.
+
 > Cookie-based pages are CSRF protected: `POST`s must carry the token rendered into the forms. From `curl`, fetch it from a form field (e.g. `GET /login`, keep the cookie jar) and send it as `-H 'csrf-token: <token>'` or a `_csrf` body field. `/chat` and `/users` are exempt.
 
 ```sh
