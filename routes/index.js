@@ -10,6 +10,16 @@ var readline = require('readline');
 var moment = require('moment');
 var exec = require('child_process').exec;
 var validator = require('validator');
+var rateLimit = require('express-rate-limit');
+
+// Throttle requests per client IP (several routes do file system or command work)
+var limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+exports.limiter = limiter;
 
 // zip-slip
 var fileType = require('file-type');
