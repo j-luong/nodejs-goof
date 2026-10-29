@@ -9,7 +9,6 @@ require('./typeorm-db')
 var st = require('st');
 var crypto = require('crypto');
 var express = require('express');
-var http = require('http');
 var https = require('https');
 var fs = require('fs');
 var path = require('path');
@@ -30,15 +29,11 @@ const hbs = require('hbs')
 
 var app = express();
 app.disable('x-powered-by');
+app.use(function (req, res, next) {
+  res.setHeader('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+  next();
+});
 
-// Behind a TLS-terminating proxy: send any plain-HTTP request to HTTPS
-if (process.env.FORCE_HTTPS === '1') {
-  app.set('trust proxy', 1);
-  app.use(function (req, res, next) {
-    if (req.secure) return next();
-    return res.redirect(308, 'https://' + req.headers.host + req.originalUrl);
-  });
-}
 var routes = require('./routes');
 var routesUsers = require('./routes/users.js')
 
@@ -55,7 +50,7 @@ app.use(methodOverride());
 app.use(session({
   secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
   name: 'connect.sid',
-  cookie: { path: '/', httpOnly: true, sameSite: 'lax', secure: 'auto' }
+  cookie: { path: '/', httpOnly: true, sameSite: 'lax', secure: true }
 }))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -105,17 +100,16 @@ if (app.get('env') == 'development') {
 
 var token = process.env.APP_TOKEN;
 
-// Serve HTTPS directly when a key/certificate pair is configured. Otherwise listen on
-// plain HTTP and rely on a TLS-terminating proxy in front of the app (see FORCE_HTTPS).
-var server;
-if (process.env.TLS_KEY_PATH && process.env.TLS_CERT_PATH) {
-  server = https.createServer({
-    key: fs.readFileSync(process.env.TLS_KEY_PATH),
-    cert: fs.readFileSync(process.env.TLS_CERT_PATH),
-  }, app);
-} else {
-  server = http.createServer(app);
+// HTTPS only: refuse to start without a key/certificate pair
+if (!process.env.TLS_KEY_PATH || !process.env.TLS_CERT_PATH) {
+  console.error('TLS_KEY_PATH and TLS_CERT_PATH must point to a PEM key and certificate; this app only serves HTTPS.');
+  process.exit(1);
 }
+
+var server = https.createServer({
+  key: fs.readFileSync(process.env.TLS_KEY_PATH),
+  cert: fs.readFileSync(process.env.TLS_CERT_PATH),
+}, app);
 
 server.listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));

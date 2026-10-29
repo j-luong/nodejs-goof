@@ -16,9 +16,14 @@ mongod &
 
 git clone https://github.com/snyk-labs/nodejs-goof
 npm install
-npm start
+
+# the app only serves HTTPS: generate a self-signed certificate for local use
+mkdir -p certs
+openssl req -x509 -newkey rsa:2048 -nodes -keyout certs/key.pem -out certs/cert.pem -days 365 -subj /CN=localhost
+
+TLS_KEY_PATH=certs/key.pem TLS_CERT_PATH=certs/cert.pem npm start
 ```
-This will run Goof locally, using a local mongo on the default port and listening on port 3001 (http://localhost:3001)
+This will run Goof locally, using a local mongo on the default port and listening on port 3001 (https://localhost:3001). The certificate is self-signed, so use `curl -k` (or `http --verify=no`) and expect a browser warning.
 
 Note: You *have* to use an old version of MongoDB version due to some of these old libraries' database server APIs. MongoDB 3 is known to work ok.
 
@@ -29,6 +34,8 @@ docker run --rm -p 27017:27017 mongo:3
 ```
 
 ## Running with docker-compose
+Generate the certificate in `./certs` as shown above first (docker-compose mounts it read-only); the app is then at https://localhost:3001.
+
 ```bash
 docker-compose up --build
 docker-compose down
@@ -37,6 +44,7 @@ docker-compose down
 ### Heroku usage
 Goof requires attaching a MongoLab service to be deployed as a Heroku app. 
 That sets up the MONGOLAB_URI env var so everything after should just work. 
+Note: the app only serves HTTPS and Heroku's router forwards plain HTTP to the dyno, so this path needs a TLS setup the router can speak to; it does not work as-is.
 
 ### CloudFoundry usage
 Goof requires attaching a MongoLab service and naming it "goof-mongo" to be deployed on CloudFoundry. 
@@ -86,29 +94,29 @@ You'd think that what's the worst that can happen because we use a validation to
 
 > The `admin@snyk.io` account is seeded with the password from the `ADMIN_PASSWORD` environment variable (e.g. `ADMIN_PASSWORD=SuperSecretPassword npm start`). Without it, the account gets a random password and you can't log in.
 
-> To serve HTTPS directly, set `TLS_KEY_PATH` and `TLS_CERT_PATH` to a PEM key and certificate. Behind a TLS-terminating proxy, set `FORCE_HTTPS=1` to redirect plain-HTTP requests to HTTPS. With neither, the app listens on plain HTTP.
+> The app only serves HTTPS: `TLS_KEY_PATH` and `TLS_CERT_PATH` must point to a PEM key and certificate or it exits at startup. It also sends an HSTS header and a `Secure` session cookie.
 
 > Cookie-based pages are CSRF protected: `POST`s must carry the token rendered into the forms. From `curl`, fetch it from a form field (e.g. `GET /login`, keep the cookie jar) and send it as `-H 'csrf-token: <token>'` or a `_csrf` body field. `/chat` and `/users` are exempt.
 
 ```sh
-curl -X 'POST' --cookie c.txt --cookie-jar c.txt -H 'Content-Type: application/json' --data-binary '{"username": "admin@snyk.io", "password": "SuperSecretPassword"}' 'http://localhost:3001/login'
+curl -X 'POST' --cookie c.txt --cookie-jar c.txt -H 'Content-Type: application/json' --data-binary '{"username": "admin@snyk.io", "password": "SuperSecretPassword"}' 'https://localhost:3001/login'
 ```
 
 ```sh
-curl -X 'POST' --cookie c.txt --cookie-jar c.txt -H 'Content-Type: application/json' --data-binary '{"email": "admin@snyk.io", "firstname": "admin", "lastname": "admin", "country": "IL", "phone": "+972551234123",  "layout": "./../package.json"}' 'http://localhost:3001/account_details'
+curl -X 'POST' --cookie c.txt --cookie-jar c.txt -H 'Content-Type: application/json' --data-binary '{"email": "admin@snyk.io", "firstname": "admin", "lastname": "admin", "country": "IL", "phone": "+972551234123",  "layout": "./../package.json"}' 'https://localhost:3001/account_details'
 ```
 
 Actually, there's even another vulnerability in this code.
 The `validator` library that we use has several known regular expression denial of service vulnerabilities. One of them, is associated with the email regex, which if validated with the `{allow_display_name: true}` option then we can trigger a denial of service for this route:
 
 ```sh
-curl -X 'POST' -H 'Content-Type: application/json' --data-binary "{\"email\": \"`seq -s "" -f "<" 100000`\"}" 'http://localhost:3001/account_details'
+curl -X 'POST' -H 'Content-Type: application/json' --data-binary "{\"email\": \"`seq -s "" -f "<" 100000`\"}" 'https://localhost:3001/account_details'
 ```
 
 The `validator.rtrim()` sanitizer is also vulnerable, and we can use this to create a similar denial of service attack:
 
 ```sh
-curl -X 'POST' -H 'Content-Type: application/json' --data-binary "{\"email\": \"someone@example.com\", \"country\": \"nop\", \"phone\": \"0501234123\", \"lastname\": \"nop\", \"firstname\": \"`node -e 'console.log(" ".repeat(100000) + "!")'`\"}" 'http://localhost:3001/account_details'
+curl -X 'POST' -H 'Content-Type: application/json' --data-binary "{\"email\": \"someone@example.com\", \"country\": \"nop\", \"phone\": \"0501234123\", \"lastname\": \"nop\", \"firstname\": \"`node -e 'console.log(" ".repeat(100000) + "!")'`\"}" 'https://localhost:3001/account_details'
 ```
 
 #### NoSQL injection
@@ -147,7 +155,7 @@ The `/admin` view introduces a `redirectPage` query path, as follows in the admi
 One fault here is that the `redirectPage` is rendered as raw HTML and not properly escaped, because it uses `<%- >` instead of `<%= >`. That itself, introduces a Cross-site Scripting (XSS) vulnerability via:
 
 ```
-http://localhost:3001/login?redirectPage="><script>alert(1)</script>
+https://localhost:3001/login?redirectPage="><script>alert(1)</script>
 ```
 
 To exploit the open redirect, simply provide a URL such as `redirectPage=https://google.com` which exploits the fact that the code doesn't enforce local URLs in `index.js:72`.

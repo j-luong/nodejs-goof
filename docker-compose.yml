@@ -5,6 +5,10 @@ services:
     container_name: goof
     environment:
       - DOCKER=1
+      - TLS_KEY_PATH=/usr/src/goof/certs/key.pem
+      - TLS_CERT_PATH=/usr/src/goof/certs/cert.pem
+    volumes:
+      - ./certs:/usr/src/goof/certs:ro
     ports:
       - "3001:3001"
       - "9229:9229"
