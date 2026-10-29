@@ -84,6 +84,8 @@ The form is completely functional. The way it works is, it receives the profile 
 
 You'd think that what's the worst that can happen because we use a validation to confirm the expected input, however the validation doesn't take into account a new field that can be added to the object, such as `layout`, which when passed to a template language, could lead to Local File Inclusion (Path Traversal) vulnerabilities. Here is a proof-of-concept showing it:
 
+> The `admin@snyk.io` account is seeded with the password from the `ADMIN_PASSWORD` environment variable (e.g. `ADMIN_PASSWORD=SuperSecretPassword npm start`). Without it, the account gets a random password and you can't log in.
+
 ```sh
 curl -X 'POST' --cookie c.txt --cookie-jar c.txt -H 'Content-Type: application/json' --data-binary '{"username": "admin@snyk.io", "password": "SuperSecretPassword"}' 'http://localhost:3001/login'
 ```
