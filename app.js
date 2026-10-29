@@ -55,7 +55,7 @@ app.use(methodOverride());
 app.use(session({
   secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
   name: 'connect.sid',
-  cookie: { path: '/' }
+  cookie: { path: '/', httpOnly: true, sameSite: 'lax', secure: 'auto' }
 }))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
