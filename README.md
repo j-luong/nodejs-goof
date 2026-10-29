@@ -86,6 +86,8 @@ You'd think that what's the worst that can happen because we use a validation to
 
 > The `admin@snyk.io` account is seeded with the password from the `ADMIN_PASSWORD` environment variable (e.g. `ADMIN_PASSWORD=SuperSecretPassword npm start`). Without it, the account gets a random password and you can't log in.
 
+> Cookie-based pages are CSRF protected: `POST`s must carry the token rendered into the forms. From `curl`, fetch it from a form field (e.g. `GET /login`, keep the cookie jar) and send it as `-H 'csrf-token: <token>'` or a `_csrf` body field. `/chat` and `/users` are exempt.
+
 ```sh
 curl -X 'POST' --cookie c.txt --cookie-jar c.txt -H 'Content-Type: application/json' --data-binary '{"username": "admin@snyk.io", "password": "SuperSecretPassword"}' 'http://localhost:3001/login'
 ```

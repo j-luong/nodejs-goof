@@ -6,6 +6,7 @@ strong {font-weight: bold}
 
 <div id="list">
   <form action="/login" method="post" accept-charset="utf-8">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
     <% if( granted == false ){ %>
     <div class="item-new">
       <center>username</center>

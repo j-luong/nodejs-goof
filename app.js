@@ -20,6 +20,7 @@ var errorHandler = require('errorhandler');
 var optional = require('optional');
 var marked = require('marked');
 var fileUpload = require('express-fileupload');
+var csrf = require('csurf');
 var dust = require('dustjs-linkedin');
 var dustHelpers = require('dustjs-helpers');
 var cons = require('consolidate');
@@ -49,6 +50,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(fileUpload());
 
+// These JSON APIs don't rely on the session cookie (credentials, if any, travel
+// in the request itself), so CSRF tokens don't apply to them
+app.get('/chat', routes.chat.get);
+app.put('/chat', routes.chat.add);
+app.delete('/chat', routes.chat.delete);
+app.use('/users', routesUsers)
+
+// CSRF protection for everything that follows (cookie/session based pages)
+app.use(csrf());
+app.use(function (req, res, next) {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
 // Routes
 app.use(routes.current_user);
 app.get('/', routes.index);
@@ -64,10 +79,6 @@ app.get('/edit/:id', routes.edit);
 app.post('/update/:id', routes.update);
 app.post('/import', routes.limiter, routes.import);
 app.get('/about_new', routes.limiter, routes.about_new);
-app.get('/chat', routes.chat.get);
-app.put('/chat', routes.chat.add);
-app.delete('/chat', routes.chat.delete);
-app.use('/users', routesUsers)
 
 // Static
 app.use(st({ path: './public', url: '/public' }));
