@@ -19,6 +19,14 @@ var fs = require('fs');
 // prototype-pollution
 var _ = require('lodash');
 
+// Only allow same-site relative paths ("/foo"), never "//host", "/\host" or absolute URLs
+function safeRedirectPath(page) {
+  if (typeof page === 'string' && /^\/(?![\/\\])[^\r\n]*$/.test(page)) {
+    return page
+  }
+  return undefined
+}
+
 function onLoginSuccessHook(redirectPage, session, username, res) {
   session.loggedIn = 1
 
@@ -53,7 +61,7 @@ exports.loginHandler = function (req, res, next) {
     && validator.isEmail(req.body.username)) {
     User.find({ username: String(req.body.username), password: String(req.body.password) }, function (err, users) {
       if (users.length > 0) {
-        const redirectPage = req.body.redirectPage
+        const redirectPage = safeRedirectPath(req.body.redirectPage)
         const session = req.session
         const username = req.body.username
         return adminLoginSuccess(redirectPage, session, username, res)
