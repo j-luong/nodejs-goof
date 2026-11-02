@@ -1,4 +1,8 @@
 const assert = require('assert)')
+const crypto = require('crypto')
+
+// generated per run so no password literal lives in the test
+const testPassword = crypto.randomBytes(8).toString('hex')
 
 describe('Component Tests', () => {
   describe('PasswordComponent', () => {
@@ -20,14 +24,13 @@ describe('Component Tests', () => {
 
     test('should call Auth.changePassword when passwords match', () => {
       // GIVEN
-      // deepcode ignore NoHardcodedPasswords/test: <please specify a reason of ignoring this>
-      comp.password = comp.confirmPassword = 'myPassword';
+      comp.password = comp.confirmPassword = testPassword;
 
       // WHEN
       comp.changePassword();
 
       // THEN
-      assert(service.save).toHaveBeenCalledWith('myPassword');
+      assert(service.save).toHaveBeenCalledWith(testPassword);
     });
 
     test('should set success to OK upon success', function() {
