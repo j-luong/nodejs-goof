@@ -37,12 +37,18 @@ app.engine('hbs', hbs.__express);
 cons.dust.helpers = dustHelpers;
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.set('trust proxy', 1); // TLS is terminated by the platform proxy in production
 app.use(logger('dev'));
 app.use(methodOverride());
 app.use(session({
   secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
   name: 'connect.sid',
-  cookie: { path: '/' }
+  cookie: {
+    path: '/',
+    httpOnly: true,
+    // Secure cookies need HTTPS; keep plain-HTTP local dev working
+    secure: app.get('env') === 'production'
+  }
 }))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
