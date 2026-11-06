@@ -48,8 +48,11 @@ exports.index = function (req, res, next) {
 };
 
 exports.loginHandler = function (req, res, next) {
-  if (validator.isEmail(req.body.username)) {
-    User.find({ username: req.body.username, password: req.body.password }, function (err, users) {
+  // coerce to strings so operator objects (e.g. {"$ne": ""}) can't reach the query
+  const loginUsername = String(req.body.username)
+  const loginPassword = String(req.body.password)
+  if (validator.isEmail(loginUsername)) {
+    User.find({ username: loginUsername, password: loginPassword }, function (err, users) {
       if (users.length > 0) {
         const redirectPage = req.body.redirectPage
         const session = req.session
